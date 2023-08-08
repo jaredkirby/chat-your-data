@@ -5,3 +5,5 @@ unstructured
 tiktoken
 rich #for console formatting
 gradio
+pdfplumber
+streamlit
