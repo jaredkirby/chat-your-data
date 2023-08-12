@@ -1,9 +1,9 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.document_loaders import PDFPlumberLoader
+from langchain.document_loaders.chatgpt import ChatGPTLoader
 from langchain.vectorstores.faiss import FAISS
 from langchain.embeddings import OpenAIEmbeddings
-from langchain.document_transformers import DoctranQATransformer
 from langchain.schema import Document
+from langchain.document_transformers import DoctranQATransformer
 
 import json
 import pickle
@@ -12,15 +12,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Load PDF data
+# Load ChatGPT data
 print("Loading data...")
-loader = PDFPlumberLoader("KPM Offsite 2021 PDF .pdf")
+loader = ChatGPTLoader(
+    log_file="conversations.json", num_logs=1
+)  # TODO: Change to real data
 raw_documents = loader.load()
 
 # Doctran QA
-# print("Running Doctran QA...")
-# qa_transformer = DoctranQATransformer(openai_api_model="gpt-3.5-turbo")
-# transformed_document = qa_transformer.transform_documents(documents)
+# qa_transformer = DoctranQATransformer()
+# transformed_document = qa_transformer.transform_documents(raw_documents)
 # print(json.dumps(transformed_document[0].metadata, indent=2))
 
 # Split text
