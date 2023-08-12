@@ -3,7 +3,7 @@ import streamlit as st
 from langchain.callbacks import StreamlitCallbackHandler
 from langchain.schema import SystemMessage, AIMessage, HumanMessage
 
-from query_data import chain_options
+from query_data_test import chain_options
 
 st.set_page_config(
     page_title="ChatLangChain",

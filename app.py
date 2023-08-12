@@ -19,7 +19,6 @@ def set_openai_api_key(api_key: str):
 
 
 class ChatWrapper:
-
     def __init__(self):
         self.lock = Lock()
 
@@ -36,6 +35,7 @@ class ChatWrapper:
                 return history, history
             # Set OpenAI key
             import openai
+
             openai.api_key = api_key
             # Run chain and append input.
             output = chain({"question": inp})["answer"]
@@ -53,8 +53,7 @@ block = gr.Blocks(css=".gradio-container {background-color: lightgray}")
 
 with block:
     with gr.Row():
-        gr.Markdown(
-            "<h3><center>Chat-Your-Data (State-of-the-Union)</center></h3>")
+        gr.Markdown("<h3><center>Chat-Your-Data (State-of-the-Union)</center></h3>")
 
         openai_api_key_textbox = gr.Textbox(
             placeholder="Paste your OpenAI API key (sk-...)",
@@ -71,8 +70,7 @@ with block:
             placeholder="Ask questions about the most recent state of the union",
             lines=1,
         )
-        submit = gr.Button(value="Send", variant="secondary").style(
-            full_width=False)
+        submit = gr.Button(value="Send", variant="secondary").style(full_width=False)
 
     gr.Examples(
         examples=[
@@ -92,10 +90,16 @@ with block:
     state = gr.State()
     agent_state = gr.State()
 
-    submit.click(chat, inputs=[openai_api_key_textbox, message,
-                 state, agent_state], outputs=[chatbot, state])
-    message.submit(chat, inputs=[
-                   openai_api_key_textbox, message, state, agent_state], outputs=[chatbot, state])
+    submit.click(
+        chat,
+        inputs=[openai_api_key_textbox, message, state, agent_state],
+        outputs=[chatbot, state],
+    )
+    message.submit(
+        chat,
+        inputs=[openai_api_key_textbox, message, state, agent_state],
+        outputs=[chatbot, state],
+    )
 
     openai_api_key_textbox.change(
         set_openai_api_key,

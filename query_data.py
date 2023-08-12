@@ -1,13 +1,9 @@
-import streamlit as st
-
-from langchain.callbacks import StreamlitCallbackHandler
-from langchain.schema import SystemMessage, AIMessage, HumanMessage
-from langchain.chains import ConversationalRetrievalChain
+from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain.prompts.prompt import PromptTemplate
 from langchain.vectorstores.base import VectorStoreRetriever
 from langchain.chat_models import ChatOpenAI
-from langchain.memory import ConversationBufferMemory
 
+from langchain.memory import ConversationBufferMemory
 import pickle
 
 _template = """
@@ -46,8 +42,6 @@ Answer in Markdown:
 """
 QA_PROMPT = PromptTemplate(template=template, input_variables=["question", "context"])
 
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
 
 def load_retriever():
     with open("vectorstore.pkl", "rb") as f:
@@ -56,19 +50,20 @@ def load_retriever():
     return retriever
 
 
-def get_basic_qa_chain(memory):
+def get_basic_qa_chain():
     llm = ChatOpenAI(model_name="gpt-4", temperature=0)
     retriever = load_retriever()
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     model = ConversationalRetrievalChain.from_llm(
         llm=llm, retriever=retriever, memory=memory
     )
     return model
 
 
-@st.cache_resource(ttl="1h")
-def get_custom_prompt_qa_chain(memory):
+def get_custom_prompt_qa_chain():
     llm = ChatOpenAI(model_name="gpt-4", temperature=0)
     retriever = load_retriever()
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # see: https://github.com/langchain-ai/langchain/issues/6635
     # see: https://github.com/langchain-ai/langchain/issues/1497
     model = ConversationalRetrievalChain.from_llm(
@@ -76,14 +71,14 @@ def get_custom_prompt_qa_chain(memory):
         retriever=retriever,
         memory=memory,
         combine_docs_chain_kwargs={"prompt": QA_PROMPT},
-        callbacks=st_callback,
     )
     return model
 
 
-def get_condense_prompt_qa_chain(memory):
+def get_condense_prompt_qa_chain():
     llm = ChatOpenAI(model_name="gpt-4", temperature=0)
     retriever = load_retriever()
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     # see: https://github.com/langchain-ai/langchain/issues/5890
     model = ConversationalRetrievalChain.from_llm(
         llm=llm,
@@ -121,48 +116,3 @@ chain_options = {
     "custom_prompt": get_custom_prompt_qa_chain,
     "condense_prompt": get_condense_prompt_qa_chain,
 }
-
-st.set_page_config(
-    page_title="ChatLangChain",
-    page_icon="🦜",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
-
-"# Chat🦜🔗"
-
-for msg in st.session_state.messages:
-    if isinstance(msg, AIMessage):
-        st.chat_message("assistant").write(msg.content)
-    elif isinstance(msg, HumanMessage):
-        st.chat_message("user").write(msg.content)
-    memory.chat_memory.add_message(msg)
-
-
-starter_message = (
-    "What is the minimum budget requirements to run a Pinterest ad with Kroger?"
-)
-if prompt := st.chat_input(placeholder=starter_message):
-    st.chat_message("user").write(prompt)
-    with st.chat_message("assistant"):
-        st_callback = StreamlitCallbackHandler(st.container())
-        response = get_custom_prompt_qa_chain(
-            {"question": prompt, "chat_history": st.session_state.messages},
-            callbacks=[st_callback],
-            include_run_info=True,
-        )
-        st.session_state.messages.append(AIMessage(content=response["output"]))
-        st.write(response["output"])
-        memory.save_context({"input": prompt}, response)
-        st.session_state["messages"] = memory.buffer
-        run_id = response["__run"].run_id
-
-        col_blank, col_text, col1, col2 = st.columns([10, 2, 1, 1])
-        with col_text:
-            st.text("Feedback:")
-
-        # with col1:
-        #    st.button("👍", on_click=send_feedback, args=(run_id, 1))
-
-        # with col2:
-        #    st.button("👎", on_click=send_feedback, args=(run_id, 0))
