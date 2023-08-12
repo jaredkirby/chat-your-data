@@ -1,15 +1,26 @@
 General:
 In mem docs- https://python.langchain.com/docs/use_cases/question_answering/how_to/question_answering
+https://python.langchain.com/docs/use_cases/question_answering/how_to/chat_vector_db
 
 Better answers:
+- Doctran -
+    - Transform docs to QAs: https://python.langchain.com/docs/integrations/document_transformers/doctran_interrogate_document
 - FLARE: https://python.langchain.com/docs/use_cases/question_answering/how_to/flare
 - HyDE: https://python.langchain.com/docs/use_cases/question_answering/how_to/hyde
-- Sources: https://python.langchain.com/docs/use_cases/question_answering/how_to/qa_citations
-- Vector Search: https://python.langchain.com/docs/use_cases/question_answering/how_to/vector_db_text_generation
+- Fact db checking?
 
 Multiple segments (example: Retailers):
 - Router Chains: https://python.langchain.com/docs/use_cases/question_answering/how_to/multi_retrieval_qa_router
 
+Multiple vectors, one for each retailer. Use router chains to route to the correct one.
+or
+One vector, but use the retailer name in the embedding and in the query term.
+
+Doc Extraction:
+- Doctran: https://python.langchain.com/docs/integrations/document_transformers/doctran_extract_properties
 
 
-
+Flow:
+- Get question
+- Question Router
+    - If question is about a specific retailer, use retailer specific vectorstore
