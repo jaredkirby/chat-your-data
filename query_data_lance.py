@@ -48,7 +48,7 @@ QA_PROMPT = PromptTemplate(template=template, input_variables=["question", "cont
 
 
 def load_retriever():
-    with open("vectorstore.pkl", "rb") as f:
+    with open("vectorstore-lance.pkl", "rb") as f:
         vectorstore = pickle.load(f)
     retriever = VectorStoreRetriever(vectorstore=vectorstore)
     return retriever
